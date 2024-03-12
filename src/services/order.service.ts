@@ -40,14 +40,15 @@ import { ApiResponseDto } from './apiResponse/apiResponse.dto';
 import { Article } from './article.service'
 import { Client } from './client.service'
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const OrderService = {
   getAll: async (): Promise<ApiResponseDto<Order[]>> => {
-    const res = await fetch('http://localhost:8080/v1/purchaseOrder');
+    const res = await fetch(apiUrl + '/v1/purchaseOrder');
     return res.json()
   },
 
   save: async (order : any): Promise<ApiResponseDto<Order>> => {
-    const res =  await fetch('http://localhost:8080/v1/purchaseOrder', {
+    const res =  await fetch(apiUrl + '/v1/purchaseOrder', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -59,7 +60,7 @@ const OrderService = {
   },
 
    update: async (order : any): Promise<ApiResponseDto<Order>> => {
-    const res =  await fetch('http://localhost:8080/v1/purchaseOrder/' + order.id.toString(), {
+    const res =  await fetch(apiUrl + '/v1/purchaseOrder/' + order.id.toString(), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -70,12 +71,12 @@ const OrderService = {
     return res.json();
   },
     getOneById: async (id: number): Promise<ApiResponseDto<Order>> => {
-        const res = await fetch('http://localhost:8080/v1/purchaseOrder/'+ id.toString());
+        const res = await fetch(apiUrl + '/v1/purchaseOrder/'+ id.toString());
         return res.json()
     },
 
     delete: async (id: number): Promise<ApiResponseDto<any>> => {
-    const res = await fetch('http://localhost:8080/v1/purchaseOrder/' + id.toString(), {
+    const res = await fetch(apiUrl + '/v1/purchaseOrder/' + id.toString(), {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json'

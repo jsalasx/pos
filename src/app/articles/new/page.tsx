@@ -1,6 +1,6 @@
 'use client'
 import { ApiResponseDto } from '@/services/apiResponse/apiResponse.dto'
-import { Article } from '@/services/article.service'
+import ArticleService, { Article } from '@/services/article.service'
 import { FormEvent, useEffect, useState } from 'react'
 import { redirect } from 'next/navigation';
 export default function Home() {
@@ -13,16 +13,9 @@ export default function Home() {
         name: formData.get('name'),
         price: formData.get('price')
     }
-    const response = await fetch('http://localhost:8080/v1/articles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(article),
-    })
+    const response = await ArticleService.save(article) 
  
-    // Handle response if necessary
-    const data: ApiResponseDto<Article> = await response.json()
+    const data: ApiResponseDto<Article> = response;
 
     if (data.status == 200) {
         setArticle(data.data);

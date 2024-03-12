@@ -5,15 +5,15 @@ export interface Article {
   tax: number
 }
 import { ApiResponseDto } from './apiResponse/apiResponse.dto';
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const ArticleService = {
   getAll: async (): Promise<ApiResponseDto<Article[]>> => {
-    const res = await fetch('http://localhost:8080/v1/articles');
+    const res = await fetch(apiUrl + '/v1/articles');
     return res.json()
   },
 
   save: async (Article : any): Promise<ApiResponseDto<Article>> => {
-    const res =  await fetch('http://localhost:8080/v1/articles', {
+    const res =  await fetch(apiUrl + '/v1/articles', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

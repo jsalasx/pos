@@ -1,14 +1,14 @@
 'use client'
 import { ApiResponseDto } from '@/services/apiResponse/apiResponse.dto'
 import { ChangeEvent, FormEvent, Fragment, useEffect, useState } from 'react'
-import { redirect } from 'next/navigation';
+import { redirect, usePathname, useSearchParams } from 'next/navigation';
 import OrderService, { CreateNewOrder, DetailOrder, DetailOrderNewOrder, Order } from '@/services/order.service';
 import ClientService, { Client } from '@/services/client.service';
 import Select, { StylesConfig } from 'react-select';
 import ArticleService, { Article } from '@/services/article.service';
 import { TrashIcon } from '@heroicons/react/16/solid';
 import { convertirFecha } from '@/utils/DateFormat';
-
+import { useRouter } from 'next/navigation';
 interface OptionType {
     value: string;
     label: string;
@@ -43,6 +43,7 @@ const customStyles: StylesConfig<OptionType, false> = {
 
 export default function Home() {
     const [order, setOrder] = useState<Order>();
+    const [currentOrder, setCurrentOrder] = useState<Order>()
     const [clients, setClients] = useState<Client[]>([]);
     const [quantity, setQuantity] = useState(0);
     const [clientsSelect, setClientsSelect] = useState<OptionType[]>([]);
@@ -56,6 +57,10 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [isRtl, setIsRtl] = useState(false);
     const [total, setTotal] = useState(0.00);
+    const [currentDescription, setCurrentDescription] = useState("");
+    const [currentClientId, setCurrentClientId] = useState<OptionType>();
+
+    const orderIdG = usePathname().split("/").pop();
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
@@ -65,23 +70,39 @@ export default function Home() {
             const clientIdInt = parseInt(clientIdAux);
             const clientAux = clients.find(x => x.id === clientIdInt);
             if (clientAux) {
-                const order: CreateNewOrder = {
-                    clientId: clientIdInt,
-                    description: formData.get('description')?.toString(),
-                    orderDetail: detailOrder,
-                    client: clientAux,
-                    subtotal: total,
-                    taxes: 0,
-                    total: total,
-                    createdAt: convertirFecha(new Date()),
-                    updatedAt: convertirFecha(new Date())
-                }
-                console.log(order);
-                // // Handle response if necessary
-                const data: ApiResponseDto<Order> = await OrderService.save(order)
-                console.log(data)
-                if (data.status == 200) {
-                    setOrder(data.data);
+                if (orderIdG) {
+                    const detailOrderAux = detailOrder.map(det => {
+                        const detail: DetailOrder = {
+                            article: det.article,
+                            id: det.id ? det.id : 0,
+                            quantity: det.quantity,
+                            totalPrice: det.totalPrice,
+                            unitPrice: det.unitPrice
+                        }
+                        return detail;
+                    })
+                    const descripcionAux = formData.get('description')?.toString()
+                    if (descripcionAux) {
+                        const order: Order = {
+                            id: parseInt(orderIdG),
+                            clientId: clientIdInt,
+                            description: descripcionAux,
+                            orderDetail: detailOrderAux,
+                            client: clientAux,
+                            subtotal: total,
+                            taxes: 0,
+                            total: total,
+                            createdAt: convertirFecha(new Date()),
+                            updatedAt: convertirFecha(new Date())
+                        }
+                        console.log(order);
+                        // // Handle response if necessary
+                        const data: ApiResponseDto<Order> = await OrderService.update(order)
+                        console.log(data)
+                        if (data.status == 200) {
+                            setOrder(data.data);
+                        }
+                    }
                 }
             }
         }
@@ -99,7 +120,25 @@ export default function Home() {
     useEffect(() => {
         getClients();
         getArticles();
+        getCurrentOrder();
     }, [])
+
+    const getCurrentOrder = async () => {
+        if (orderIdG) {
+            const res = await OrderService.getOneById(parseInt(orderIdG));
+            console.log("current order");
+            console.log(res.data);
+            setCurrentOrder(res.data)
+            setCurrentDescription(res.data.description)
+            setDetailOrder(res.data.orderDetail)
+            const currentClientIdAux: OptionType = {
+                value: res.data.client.id.toString(),
+                label: res.data.client.name
+            }
+            calcTotal(res.data.orderDetail);
+            setCurrentClientId(currentClientIdAux)
+        }
+    }
 
     const getClients = async () => {
         const res = await ClientService.getAll();
@@ -148,13 +187,13 @@ export default function Home() {
                     unitPrice: article.price
                 }
                 setDetailOrder(prevDetail => [...prevDetail, itemToAdd]);
-                calcTotal([...detailOrder,itemToAdd])
+                calcTotal([...detailOrder, itemToAdd])
             }
         }
-        
+
     }
 
-    const calcTotal = (detailAux:  DetailOrderNewOrder[]) => {
+    const calcTotal = (detailAux: DetailOrderNewOrder[]) => {
         const totalPriceSum: number = detailAux.reduce((total, orderDetail) => total + orderDetail.totalPrice, 0);
         setTotal(totalPriceSum);
     }
@@ -173,7 +212,7 @@ export default function Home() {
     }
 
     return <>
-        <h1>Nueva Orden de Compra</h1>
+        <h1>Editar OC - {orderIdG} </h1>
         <form onSubmit={onSubmit}>
             <div className="space-y-12">
                 <div className="border-b border-white/10 pb-12">
@@ -195,6 +234,7 @@ export default function Home() {
                                     isSearchable={isSearchable}
                                     name="clientId"
                                     id="clientId"
+                                    value={currentClientId}
                                     options={clientsSelect}
 
                                 />
@@ -212,6 +252,7 @@ export default function Home() {
                                         type="text"
                                         name="description"
                                         id="description"
+                                        value={currentDescription}
                                         autoComplete="description"
                                         className="flex-1 border-0 bg-transparent py-1.5 pl-1 text-white focus:ring-0 sm:text-sm sm:leading-6"
                                         placeholder="Descripción de la orden de compra"
@@ -304,7 +345,7 @@ export default function Home() {
                                                             {detailOrder.map((det, index) => (
                                                                 <tr key={index}>
                                                                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-0">
-                                                                        {det.article.id}
+                                                                        {det.id}
                                                                     </td>
                                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{det.article.name}</td>
                                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{det.quantity}</td>

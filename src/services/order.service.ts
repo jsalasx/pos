@@ -7,8 +7,8 @@ export interface Order {
   subtotal: number
   taxes: number
   total: number
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CreateNewOrder {
@@ -30,6 +30,7 @@ export interface DetailOrder {
     unitPrice: number
 }
 export interface DetailOrderNewOrder {
+    id?: number
     article: Article
     quantity: number
     totalPrice: number

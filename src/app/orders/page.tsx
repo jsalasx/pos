@@ -3,6 +3,7 @@ import OrderService, { Order } from "@/services/order.service";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Modal from "./modal";
+import { convertirFechaString } from "@/utils/DateFormat";
 
 export default function Page() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -60,6 +61,8 @@ export default function Page() {
                                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Cliente</th>
                                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Descripcion</th>
                                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Total</th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Fecha Creación</th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Fecha Actualizaciónn</th>
                                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-0">Acciones</th>
                                 </tr>
                             </thead>
@@ -71,6 +74,8 @@ export default function Page() {
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.client.name}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.description}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.total}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.createdAt)}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.updatedAt)}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">
                                                 <button onClick={ e => deleteOrder(order)}
                                                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">

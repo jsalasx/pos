@@ -2,11 +2,18 @@
 import OrderService, { Order } from "@/services/order.service";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Modal from "./modal";
 
-export default function Home() {
-
+export default function Page() {
     const [orders, setOrders] = useState<Order[]>([]);
+    const [orderSelected, setOrderSelected] = useState<Order>();
+    const [isShown, setIsShown] = useState(false);
 
+     const fetchOrders = async () => {
+            const res = await OrderService.getAll();
+            res.data.sort((a, b) => b.id - a.id);
+            setOrders(res.data);
+        };
     useEffect(() => {
         const fetchOrders = async () => {
             const res = await OrderService.getAll();
@@ -17,12 +24,18 @@ export default function Home() {
         fetchOrders();
     }, []); 
 
-    const deleteOrder = (order: any)  => {
+    const deleteOrder = async (order: any)  => {
         console.log(order.id)
+        const res = await OrderService.delete(order.id)
+        if (res.status == 200) {
+            fetchOrders();
+        }
     }
     
     const verDetalle = (order: Order)  => {
-        console.log(order.articleList)
+        setIsShown(true);
+        setOrderSelected(order);
+        console.log(order.orderDetail)
     }
 
     return <>
@@ -54,11 +67,11 @@ export default function Home() {
                                 {orders.map((order) => {
                                     return (
                                         <tr key={order.id}>
-                                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-0 sm:pl-0">{order.id}</td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.client.name}</td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.description}</td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.total}</td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-0 sm:pl-0">OC - {order.id}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.client.name}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.description}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{order.total}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">
                                                 <button onClick={ e => deleteOrder(order)}
                                                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                                                     Eliminar</button>
@@ -66,8 +79,8 @@ export default function Home() {
                                                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                                                     Editar</button>
                                                 </Link>
-                                                <button onClick={ e => verDetalle(order)}
-                                                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                    <button onClick={ e => verDetalle(order)}
+                                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                                                     Ver Detalle</button>
                                             </td>
                                         </tr>
@@ -79,7 +92,7 @@ export default function Home() {
                 </div>
             </div>
         </div>
-
+        {isShown && <Modal order={orderSelected} setIsShown={setIsShown} />}
     </>
 }
 

@@ -73,13 +73,14 @@ const OrderService = {
         return res.json()
     },
 
-    delete: async (id: number): Promise<void> => {
-    await fetch('http://localhost:8080/v1/purchaseOrder/' + id.toString(), {
+    delete: async (id: number): Promise<ApiResponseDto<any>> => {
+    const res = await fetch('http://localhost:8080/v1/purchaseOrder/' + id.toString(), {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json'
       }
     });
+    return res.json()
   }
 
 

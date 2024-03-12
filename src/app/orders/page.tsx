@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Modal from "./modal";
 import { convertirFechaString } from "@/utils/DateFormat";
-
+import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/16/solid";
+import Swal from 'sweetalert2'
 export default function Page() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [orderSelected, setOrderSelected] = useState<Order>();
@@ -27,10 +28,24 @@ export default function Page() {
 
     const deleteOrder = async (order: any)  => {
         console.log(order.id)
-        const res = await OrderService.delete(order.id)
-        if (res.status == 200) {
-            fetchOrders();
-        }
+        Swal.fire({
+            title: "Esta seguro de eliminar la OC - "+ order.id.toString() + "?",
+            showCancelButton: true,
+            confirmButtonText: "Save",
+            }).then(async (result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                const res = await OrderService.delete(order.id)
+                    if (res.status == 200) {
+                        Swal.fire("Eliminado!", "", "success");
+                        fetchOrders();
+                    }
+            } else if (result.isDenied) {
+                //Swal.fire("Changes are not saved", "", "info");
+            }
+            });
+        
+        
     }
     
     const verDetalle = (order: Order)  => {
@@ -77,16 +92,17 @@ export default function Page() {
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.createdAt)}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.updatedAt)}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">
-                                                <button onClick={ e => deleteOrder(order)}
-                                                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                    Eliminar</button>
+                                                 <button onClick={ e => verDetalle(order)}
+                                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                   <EyeIcon className="h-6 w-6 text-gray-100" ></EyeIcon></button>
                                                 <Link href={"/orders/edit/"+order.id.toString()}><button
                                                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                    Editar</button>
+                                                     <PencilIcon className="h-6 w-6 text-gray-100" ></PencilIcon></button>
                                                 </Link>
-                                                    <button onClick={ e => verDetalle(order)}
-                                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                    Ver Detalle</button>
+                                                   
+                                                <button onClick={ e => deleteOrder(order)}
+                                                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                    <TrashIcon className="h-6 w-6 text-gray-100" ></TrashIcon></button>
                                             </td>
                                         </tr>
                                     );

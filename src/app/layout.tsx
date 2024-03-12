@@ -13,8 +13,8 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <header className="text-xl font-bold leading-[3rem]"> Punto de Venta </header>
         <main className="py-8">{children}</main>
         <footer className="text-center leading-[3rem] opacity-70">
-          © {new Date().getFullYear()} Restaurancy
-        </footer>
+          ©  Altiora {new Date().getFullYear()}
+        </footer> 
       </body>
     </html>
   );

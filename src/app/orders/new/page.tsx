@@ -8,12 +8,6 @@ import Select, { StylesConfig } from 'react-select';
 import ArticleService, { Article } from '@/services/article.service';
 import { TrashIcon } from '@heroicons/react/16/solid';
 import { convertirFecha } from '@/utils/DateFormat';
-const Checkbox = ({ children, ...props }: JSX.IntrinsicElements['input']) => (
-    <label style={{ marginRight: '1em' }}>
-        <input type="checkbox" {...props} />
-        {children}
-    </label>
-);
 
 interface OptionType {
     value: string;

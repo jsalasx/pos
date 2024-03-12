@@ -11,11 +11,11 @@ export default function Page() {
     const [orderSelected, setOrderSelected] = useState<Order>();
     const [isShown, setIsShown] = useState(false);
 
-     const fetchOrders = async () => {
-            const res = await OrderService.getAll();
-            res.data.sort((a, b) => b.id - a.id);
-            setOrders(res.data);
-        };
+    const fetchOrders = async () => {
+        const res = await OrderService.getAll();
+        res.data.sort((a, b) => b.id - a.id);
+        setOrders(res.data);
+    };
     useEffect(() => {
         const fetchOrders = async () => {
             const res = await OrderService.getAll();
@@ -24,31 +24,31 @@ export default function Page() {
         };
 
         fetchOrders();
-    }, []); 
+    }, []);
 
-    const deleteOrder = async (order: any)  => {
+    const deleteOrder = async (order: any) => {
         console.log(order.id)
         Swal.fire({
-            title: "Esta seguro de eliminar la OC - "+ order.id.toString() + "?",
+            title: "Esta seguro de eliminar la OC - " + order.id.toString() + "?",
             showCancelButton: true,
             confirmButtonText: "Save",
-            }).then(async (result) => {
+        }).then(async (result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
                 const res = await OrderService.delete(order.id)
-                    if (res.status == 200) {
-                        Swal.fire("Eliminado!", "", "success");
-                        fetchOrders();
-                    }
+                if (res.status == 200) {
+                    Swal.fire("Eliminado!", "", "success");
+                    fetchOrders();
+                }
             } else if (result.isDenied) {
                 //Swal.fire("Changes are not saved", "", "info");
             }
-            });
-        
-        
+        });
+
+
     }
-    
-    const verDetalle = (order: Order)  => {
+
+    const verDetalle = (order: Order) => {
         setIsShown(true);
         setOrderSelected(order);
         console.log(order.orderDetail)
@@ -92,17 +92,19 @@ export default function Page() {
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.createdAt)}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">{convertirFechaString(order.updatedAt)}</td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-200">
-                                                 <button onClick={ e => verDetalle(order)}
+                                                <div className="grid gap-2 grid-cols-3">
+                                                    <button onClick={e => verDetalle(order)}
                                                         className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                   <EyeIcon className="h-6 w-6 text-gray-100" ></EyeIcon></button>
-                                                <Link href={"/orders/edit/"+order.id.toString()}><button
-                                                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                     <PencilIcon className="h-6 w-6 text-gray-100" ></PencilIcon></button>
-                                                </Link>
-                                                   
-                                                <button onClick={ e => deleteOrder(order)}
-                                                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                    <TrashIcon className="h-6 w-6 text-gray-100" ></TrashIcon></button>
+                                                        <EyeIcon className="h-6 w-6 text-gray-100" ></EyeIcon></button>
+                                                    <Link href={"/orders/edit/" + order.id.toString()}><button
+                                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                        <PencilIcon className="h-6 w-6 text-gray-100" ></PencilIcon></button>
+                                                    </Link>
+
+                                                    <button onClick={e => deleteOrder(order)}
+                                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                                        <TrashIcon className="h-6 w-6 text-gray-100" ></TrashIcon></button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
